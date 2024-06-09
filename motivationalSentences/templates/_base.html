@@ -8,8 +8,33 @@
 </head>
 <body id="body">
     <div>
-        <h1>Nothing is impossible. The word itself says 'I'm possible!</h1>
+        <h1 id="phrase"></h1>
+        <button onclick="next_phrase()">next</button>
     </div>
 </body>
-<script src="{% static 'script.js' %}"></script>
+<script>
+    change_background_color()
+    var data = JSON.parse("{{data|escapejs}}");
+    phrase_id = Math.floor(Math.random() * data.length);
+    var phrase_h1 = document.getElementById("phrase")
+    phrase_h1.innerHTML = data[phrase_id][1]
+    function next_phrase() {
+        if (phrase_id!=data.length) {
+            phrase_id += 1
+            phrase_h1.innerHTML = data[phrase_id][1]
+            change_background_color()
+        } else {
+            phrase_id = 0
+            phrase_h1.innerHTML = data[phrase_id][1]
+            change_background_color()
+        }
+    }
+    function change_background_color() {
+        random_background_color_id = Math.floor(Math.random() * 10);
+        const background_colors = ["aquamarine", "lightblue", "orange",
+            "yellowgreen", "green","blue", "pink", "black", "purple"]
+        var body = document.getElementById("body")
+        body.style = "background-color:"+background_colors[random_background_color_id]+";"
+    }
+</script>
 </html>
