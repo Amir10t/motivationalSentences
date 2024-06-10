@@ -8,3 +8,9 @@ h1 {
     color: whitesmoke;
     text-align: center;
 }
+#phrase button {
+    text-align: center;
+    margin-left: 48%;
+    width: 10em;
+    height: 3em;
+}
