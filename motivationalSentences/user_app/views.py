@@ -1,12 +1,12 @@
 from django.contrib.auth import login
-from django.contrib.auth.models import User
+from .models import User
 from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse
 from django.views.generic import View
-from utils.email_service import send_email
 from .forms import LoginForm, RegisterForm, ResetPassword
 from utils.email_service import send_email
 from utils.password_creator import number_password_generator
+from django.utils.crypto import get_random_string
 
 
 # Create your views here.
@@ -21,7 +21,7 @@ class LoginOrRegisterView(View):
             "register_form": register_form,
             "reset_password_form": reset_password_form
         }
-        return render(request, "user_app/loginOrRegister.html", context)
+        return render(request, "user/LoginOrSignUp.html", context)
 
 
 def login_operator(request: HttpRequest):
@@ -42,7 +42,7 @@ def login_operator(request: HttpRequest):
             "login_form":login_form
         }
 
-        return render(request, "user_app/loginOrRegister.html", context)
+        return render(request, "user/LoginOrSignUp.html", context)
 
 def register_operator(request: HttpRequest):
     register_form = RegisterForm(request.POST)
@@ -53,6 +53,7 @@ def register_operator(request: HttpRequest):
         if User.objects.filter(email=email).exists() == False:
             if password == repeat_password:
                 new_user = User(email=email)
+                new_user.email_active_code = get_random_string(72)
                 new_user.set_password(password)
                 new_user.save()
             else:
@@ -64,7 +65,7 @@ def register_operator(request: HttpRequest):
             "register_from":register_form
         }
 
-        return render(request, "user_app/loginOrRegister.html", context)
+        return render(request, "user/LoginOrSignUp.html", context)
 
 
 def reset_password_operator(request: HttpRequest):
