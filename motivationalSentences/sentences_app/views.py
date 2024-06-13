@@ -11,7 +11,7 @@ class PhraseView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         data = []
-        for obj in Phrase.objects.all():
-            data.append([obj.id, obj.phrase])
+        for obj in Phrase.objects.filter(is_active=True):
+            data.append([obj.id, obj.phrase, "" if obj.background == "" else obj.background.url])
         context['data'] = json.dumps(data)
         return context
