@@ -1,12 +1,13 @@
-from django.contrib.auth import login
 from .models import User
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
 from django.views.generic import View
-from .forms import LoginForm, RegisterForm, ResetPassword
 from utils.email_service import send_email
-from utils.password_creator import number_password_generator
+from django.contrib.auth import login, logout
 from django.utils.crypto import get_random_string
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render, redirect, reverse
+from .forms import LoginForm, RegisterForm, ResetPassword
+
+
 
 
 # Create your views here.
@@ -55,6 +56,7 @@ def register_operator(request: HttpRequest):
                 new_user = User(email=email)
                 new_user.email_active_code = get_random_string(72)
                 new_user.set_password(password)
+                new_user.username = get_random_string(6)
                 new_user.save()
             else:
                 register_form.add_error("repeat_password", "pass != repeat pass")
@@ -74,10 +76,19 @@ def reset_password_operator(request: HttpRequest):
         email = reset_password_form.cleaned_data.get("email")
         user: User = User.objects.filter(email=email).first()
         if(user is not None):
-            new_password = number_password_generator(4)
-            user.set_password(new_password)
-            user.save()
-            send_email("Your New Pass", f"Your New Password is {new_password}", email)
+            user.email_active_code = get_random_string(72)
+            send_email("Forgot Your Password?", f"If You Forgot Your Password Click on this link http://127.0.0.1:8000/reset-pass/{user.email_active_code}", email)
             return HttpResponse("Pass sent")
         else:
             return HttpResponse("There is No User")
+
+class ResetPasswordView(View):
+    def get(self, request:HttpRequest, active_code):
+        user = User.objects.filter(email_active_code__iexact=active_code).first()
+        login(request, user)
+        return HttpResponse("LogIn!")
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect(reverse('login-or-register'))
